@@ -4,6 +4,8 @@ import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
 import android.animation.ValueAnimator;
+import android.app.SearchManager;
+import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
@@ -11,7 +13,9 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ProgressBar;
+import android.widget.SearchView;
 
 import com.yuyakaido.android.cardstackview.CardStackView;
 import com.yuyakaido.android.cardstackview.SwipeDirection;
@@ -25,6 +29,7 @@ public class MainActivity extends AppCompatActivity {
     private ProgressBar progressBar;
     private CardStackView cardStackView;
     private TouristSpotCardAdapter adapter;
+    private Button btnReload;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,6 +42,9 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.activity_main, menu);
+        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+        SearchView searchView = (SearchView) menu.findItem(R.id.search_menu).getActionView();
+        searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
         return true;
     }
 
@@ -98,7 +106,13 @@ public class MainActivity extends AppCompatActivity {
 
     private void setup() {
         progressBar = (ProgressBar) findViewById(R.id.activity_main_progress_bar);
-
+        btnReload = (Button) findViewById(R.id.btn_reload);
+        btnReload.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                reload();
+            }
+        });
         cardStackView = (CardStackView) findViewById(R.id.activity_main_card_stack_view);
         cardStackView.setCardEventListener(new CardStackView.CardEventListener() {
             @Override
@@ -110,9 +124,12 @@ public class MainActivity extends AppCompatActivity {
             public void onCardSwiped(SwipeDirection direction) {
                 Log.d("CardStackView", "onCardSwiped: " + direction.toString());
                 Log.d("CardStackView", "topIndex: " + cardStackView.getTopIndex());
-                if (cardStackView.getTopIndex() == adapter.getCount() - 5) {
-                    Log.d("CardStackView", "Paginate: " + cardStackView.getTopIndex());
-                    paginate();
+//                if (cardStackView.getTopIndex() == adapter.getCount() - 5) {
+//                    Log.d("CardStackView", "Paginate: " + cardStackView.getTopIndex());
+//                    paginate();
+//                }
+                if(cardStackView.getTopIndex() == adapter.getCount()){
+                    btnReload.setVisibility(View.VISIBLE);
                 }
             }
 
@@ -134,6 +151,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void reload() {
+        btnReload.setVisibility(View.INVISIBLE);
         cardStackView.setVisibility(View.GONE);
         progressBar.setVisibility(View.VISIBLE);
         new Handler().postDelayed(new Runnable() {
